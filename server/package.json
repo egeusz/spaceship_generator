@@ -1,0 +1,28 @@
+{
+  "name": "spaceship_generator",
+  "version": "0.0.1",
+  "description": "makes random spaceships using webgl",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/egeusz/spaceship_generator.git"
+  },
+  "keywords": [
+    "threejs",
+    "webgl",
+    "spaceship",
+    "genorator"
+  ],
+  "author": "Eric Geusz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/egeusz/spaceship_generator/issues"
+  },
+  "homepage": "https://github.com/egeusz/spaceship_generator#readme",
+  "dependencies": {
+    "express": "^4.15.4"
+  }
+}
