@@ -1,9 +1,24 @@
 function CameraControls(e_screen, camera_root) {
+    var self = this;
+    var camera = camera_root.children[0];
+
     var mouseIsDown = false;
     var spindown = false;
+
     var oldMousePos = new THREE.Vector2(0, 0);
     var mouseDelta = new THREE.Vector2(0, 0);
     var rotationDelta = new THREE.Vector2(0, 0);
+
+    var isZooming = false;
+
+    var zoomPos = 1000;
+    var zoomDelta = 0;
+    camera.position.setZ(zoomPos);
+
+    this.zoomMax = 7000;
+    this.zoomMin = 1000;
+    //this.zoomMin_stopbuffer = 500;
+    this.zoomSpeed = 200;
 
     e_screen.on("mousedown", function(event) {
         mouseIsDown = true;
@@ -26,9 +41,29 @@ function CameraControls(e_screen, camera_root) {
         }
     });
 
+    e_screen.bind('mousewheel DOMMouseScroll', function(event) {
+
+        if (event.originalEvent.wheelDelta > 0 || event.originalEvent.detail < 0) {
+            // scroll up
+            //console.log("Zoom Out");
+            if (zoomPos < self.zoomMax) {
+                isZooming = true;
+                zoomDelta = self.zoomSpeed;
+            }
+
+        } else {
+            // scroll down
+            //console.log("Zoom In");
+            if (zoomPos > self.zoomMin) {
+                isZooming = true;
+                zoomDelta = -self.zoomSpeed;
+            }
+        }
+    });
 
 
     this.update = function() {
+        //Rotation
         if (mouseIsDown) {
 
             camera_root.rotateX(toRad(rotationDelta.x));
@@ -44,5 +79,24 @@ function CameraControls(e_screen, camera_root) {
             camera_root.rotateX(toRad(rotationDelta.x));
             camera_root.rotateY(toRad(rotationDelta.y));
         }
+
+        //Zoom
+        if (isZooming) {
+
+            zoomDelta = zoomDelta * 0.85;
+            if (zoomPos < this.zoomMin) {
+                zoomDelta = zoomDelta * 0.6;
+            }
+            if (Math.abs(zoomDelta) < 0.000000001) {
+                zoomDelta = 0;
+                isZooming = false;
+            }
+
+            zoomPos += zoomDelta;
+
+
+            camera.position.setZ(zoomPos);
+        }
+
     }
 }

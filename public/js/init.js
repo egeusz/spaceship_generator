@@ -23,8 +23,8 @@ function init() {
 
     scene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.z = 1000;
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100000);
+    //camera.position.z = 1000;
 
 
 
@@ -57,22 +57,22 @@ function init() {
 
 
     ///--------------------------------------------------------------
-    // var geometry = new THREE.CylinderGeometry(0, 10, 30, 4, 1);
-    // var material = new THREE.MeshPhongMaterial({
+    // var geometry_t = new THREE.CylinderGeometry(0, 10, 30, 4, 1);
+    // var material_t = new THREE.MeshPhongMaterial({
     //     color: 0xffffff,
     //     flatShading: true
     // });
 
     // for (var i = 0; i < 500; i++) {
 
-    //     var mesh = new THREE.Mesh(geometry, material);
-    //     mesh.position.x = (Math.random() - 0.5) * 1000;
-    //     mesh.position.y = (Math.random() - 0.5) * 1000;
-    //     mesh.position.z = (Math.random() - 0.5) * 1000;
-    //     mesh.updateMatrix();
-    //     mesh.matrixAutoUpdate = false;
-    //     scene.add(mesh);
-    //}
+    //     var mesh_t = new THREE.Mesh(geometry_t, material_t);
+    //     mesh_t.position.x = (Math.random() - 0.5) * 1000;
+    //     mesh_t.position.y = (Math.random() - 0.5) * 1000;
+    //     mesh_t.position.z = (Math.random() - 0.5) * 1000;
+    //     mesh_t.updateMatrix();
+    //     mesh_t.matrixAutoUpdate = false;
+    //     scene.add(mesh_t);
+    // }
     ///--------------------------------------------------------------
 
 
