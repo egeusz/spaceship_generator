@@ -2,6 +2,10 @@ var stats;
 
 var scene;
 var camera;
+
+var scene_bg;
+var camera_bg;
+
 var renderer;
 
 var camera_root;
@@ -22,9 +26,10 @@ function init() {
 
 
     scene = new THREE.Scene();
-
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100000);
-    //camera.position.z = 1000;
+
+    scene_bg = new THREE.Scene();
+    camera_bg = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100000);
 
 
 
@@ -32,9 +37,12 @@ function init() {
     light_sun.position.set(1, 1, 1).normalize();
     scene.add(light_sun);
 
+
     var light_blue = new THREE.DirectionalLight(0x99ccff);
     light_blue.position.set(-1, -1, -1).normalize();
     scene.add(light_blue);
+
+
 
     camera_root = new THREE.Object3D();
 
@@ -56,7 +64,7 @@ function init() {
 
 
 
-    ///--------------------------------------------------------------
+    //--------------------------------------------------------------
     // var geometry_t = new THREE.CylinderGeometry(0, 10, 30, 4, 1);
     // var material_t = new THREE.MeshPhongMaterial({
     //     color: 0xffffff,
@@ -64,21 +72,23 @@ function init() {
     // });
 
     // for (var i = 0; i < 500; i++) {
-
     //     var mesh_t = new THREE.Mesh(geometry_t, material_t);
     //     mesh_t.position.x = (Math.random() - 0.5) * 1000;
     //     mesh_t.position.y = (Math.random() - 0.5) * 1000;
     //     mesh_t.position.z = (Math.random() - 0.5) * 1000;
     //     mesh_t.updateMatrix();
     //     mesh_t.matrixAutoUpdate = false;
-    //     scene.add(mesh_t);
+    //     scene_bg.add(mesh_t);
     // }
-    ///--------------------------------------------------------------
+    //--------------------------------------------------------------
+
+    buildBackground(scene_bg);
 
 
     renderer = new THREE.WebGLRenderer({
-        antialias: true
+        antialias: true,
     });
+    renderer.autoClear = false;
 
     //append renderer to the screen
     renderer.setSize(e_screen.width(), e_screen.height());
@@ -97,9 +107,11 @@ function init() {
 
 
 function onWindowResize() {
-
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+
+    camera_bg.aspect = window.innerWidth / window.innerHeight;
+    camera_bg.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
@@ -115,9 +127,12 @@ function animate() {
     requestAnimationFrame(animate);
 
     cameraControls.update();
+    camera_bg.quaternion.copy(camera_root.quaternion);
 
-
-
+    renderer.render(scene_bg, camera_bg);
+    renderer.clearDepth();
     renderer.render(scene, camera);
+
+
     stats.end();
 }

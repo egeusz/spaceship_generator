@@ -12,13 +12,14 @@ function CameraControls(e_screen, camera_root) {
     var isZooming = false;
 
     var zoomPos = 1000;
-    var zoomDelta = 0;
+    //var zoomDelta = 0;
+    var zoomTarget = zoomPos;
     camera.position.setZ(zoomPos);
 
     this.zoomMax = 7000;
-    this.zoomMin = 1000;
+    this.zoomMin = 500;
     //this.zoomMin_stopbuffer = 500;
-    this.zoomSpeed = 200;
+    this.zoomSpeed = 400;
 
     e_screen.on("mousedown", function(event) {
         mouseIsDown = true;
@@ -46,17 +47,19 @@ function CameraControls(e_screen, camera_root) {
         if (event.originalEvent.wheelDelta > 0 || event.originalEvent.detail < 0) {
             // scroll up
             //console.log("Zoom Out");
-            if (zoomPos < self.zoomMax) {
-                isZooming = true;
-                zoomDelta = self.zoomSpeed;
+            isZooming = true;
+            zoomTarget += self.zoomSpeed;
+            if (zoomTarget > self.zoomMax) {
+                zoomTarget = self.zoomMax;
             }
 
         } else {
             // scroll down
             //console.log("Zoom In");
-            if (zoomPos > self.zoomMin) {
-                isZooming = true;
-                zoomDelta = -self.zoomSpeed;
+            isZooming = true;
+            zoomTarget -= self.zoomSpeed;
+            if (zoomTarget < self.zoomMin) {
+                zoomTarget = self.zoomMin;
             }
         }
     });
@@ -83,17 +86,12 @@ function CameraControls(e_screen, camera_root) {
         //Zoom
         if (isZooming) {
 
-            zoomDelta = zoomDelta * 0.85;
-            if (zoomPos < this.zoomMin) {
-                zoomDelta = zoomDelta * 0.6;
-            }
+            var zoomDelta = (zoomTarget - zoomPos) * 0.10;
             if (Math.abs(zoomDelta) < 0.000000001) {
                 zoomDelta = 0;
                 isZooming = false;
             }
-
             zoomPos += zoomDelta;
-
 
             camera.position.setZ(zoomPos);
         }
