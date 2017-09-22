@@ -19,6 +19,48 @@ var geometry, material, mesh;
 
 var e_screen;
 
+//-----------------------------
+//temp globals - these will be replaced once I implement a real loader
+var planet_fs;
+var planet_vs;
+
+
+
+//-----------------------------
+
+//TO DO -- REPLACE WITH ACTUAL LOADER
+function load() {
+
+    // $.get("/shaders/planet.fs", function(data) {
+    //     planet_fs = $(data).text();
+    //     $.get("/shaders/planet.vs", function(data) {
+    //         planet_vs = $(data).text();
+
+    //         init();
+    //     });
+    // });
+
+    $.get("/shaders/planet_frag.glsl", function(data) {
+        planet_fs = data;
+        $.get("/shaders/planet_vert.glsl", function(data) {
+            planet_vs = data;
+            init();
+        });
+    });
+
+
+    // $.get("/shaders/phong_frag.glsl", function(data) {
+    //     planet_fs = data;
+    //     $.get("/shaders/phong_vertex.glsl", function(data) {
+    //         planet_vs = data;
+    //         init();
+    //     });
+    // });
+
+
+
+}
+
 
 function init() {
 
@@ -38,10 +80,9 @@ function init() {
     scene.add(light_sun);
 
 
-    var light_blue = new THREE.DirectionalLight(0x99ccff);
-    light_blue.position.set(-1, -1, -1).normalize();
-    scene.add(light_blue);
-
+    // var light_blue = new THREE.DirectionalLight(0x99ccff);
+    // light_blue.position.set(-1, -1, -1).normalize();
+    // scene.add(light_blue);
 
 
     camera_root = new THREE.Object3D();
@@ -60,8 +101,37 @@ function init() {
 
     mesh = new THREE.Mesh(geometry, material);
     mesh.rotateX(toRad(90));
-    scene.add(mesh);
+    //scene.add(mesh);
 
+
+    {
+        var ball_material = new THREE.MeshPhongMaterial({
+            color: 0x8888FF,
+            specular: 0xFFFFFF,
+            shininess: 30,
+            flatShading: false
+        });
+        //ball_material.color = new THREE.Color('#65adff');
+        var ball_geometry = new THREE.SphereGeometry(1, 64, 64);
+        var ball_mesh = new THREE.Mesh(ball_geometry, ball_material);
+
+        ball_mesh.scale.x = 100;
+        ball_mesh.scale.y = 100;
+        ball_mesh.scale.z = 100;
+
+        ball_mesh.position.x = 200;
+        ball_mesh.position.y = 0;
+        ball_mesh.position.z = 0;
+
+        scene.add(ball_mesh);
+    }
+
+
+
+
+    var planet = createPlanet();
+    //planet.scale = new THREE.Vector3(60, 60, 60);
+    scene.add(planet);
 
 
     //--------------------------------------------------------------

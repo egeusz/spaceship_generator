@@ -9,15 +9,19 @@
 
 		<link rel="stylesheet" href="css/styles.css">
 		<!--<script src="js/three.min.js"></script>-->
-		<script src="lib/jquery/jquery.slim.js"></script>
+		<script src="lib/jquery/jquery.js"></script>
 		<script src="lib/three.js"></script>
 		<script src="lib/stats.js"></script>
 	</head>
 
-	<body onload="init()">
+	<body onload="load()">
 		<div class="screen" id="screen">
 
 		</div>
+
+		<script src="shaders/planet.fs" type="x-shader/x-vertex" id="planet_vertexshader"></script>
+		<script src="shaders/planet.vs" type="x-shader/x-fragment" id="planet_fragmentshader"></script>
+		<script src="js/planet.js"></script>
 		<script src="js/utilities.js"></script>
 		<script src="js/controls.js"></script>
 		<script src="js/background.js"></script>
