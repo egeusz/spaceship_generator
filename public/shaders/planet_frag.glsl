@@ -137,7 +137,7 @@ void main() {
 
 	//-----------------
 
-
+	/*
 	vec3 normal = normalize( viewNormal );
 
 
@@ -156,6 +156,7 @@ void main() {
 
 	vec3 bitanU = tsn * vec3(1.0,0.0,0.0);
 	vec3 bitanV = tsn * vec3(0.0,1.0,0.0);
+	*/
 
 	//------------------
 	
@@ -203,7 +204,7 @@ void main() {
 			addedSunsetRim += sunset;
 			
 			//---Cloud Shadow
-			
+			/*
 			float shadowOffsetU = dot( -lightDirection, bitanU)*cloudHeight;
 			float shadowOffsetV = dot( -lightDirection, bitanV)*cloudHeight;
 
@@ -211,7 +212,7 @@ void main() {
 			vUv_shadow_offset = mod(vUv_shadow_offset,1.0);
 
 			addedcloudShadow +=  (1.0 - texture2D( txtrclouds, vUv_shadow_offset ).a);
-
+			*/
 
 			//---Spec
 			float specular = clamp(dot(reflect(lightDirection, viewNormal), cameraViewDirection),0.0, 1.0);
@@ -235,17 +236,14 @@ void main() {
 	vec4 surfaceColor = mix( texture2D(txtrdiff, vUv), atmoHaze, faceRatioInv);
 
 	//add sunset color to surface
-	surfaceColor =  mix( surfaceColor, vec4(coloratmoscatter1, 1.0), pow(addedSunsetRim,7.0) )*addedcloudShadow;
+	surfaceColor =  mix( surfaceColor, vec4(coloratmoscatter1, 1.0), pow(addedSunsetRim,6.0) );//*addedcloudShadow;
 
 	//add sunset color to clouds
-	cloudTexture =  mix( cloudTexture, vec4(coloratmoscatter1, 1.0), pow(addedSunsetRim,6.0) );
+	cloudTexture =  mix( cloudTexture, vec4(coloratmoscatter1, 1.0), pow(addedSunsetRim,5.0) );
 
 	//-----------------
 	//process lambert
 	
-
-	
-
 	surfaceColor = mix( surfaceColor, cloudTexture,  cloudTexture.a );
 
 
@@ -275,9 +273,10 @@ void main() {
 
 	vec4 lights = mix(texture2D(txtrlights, vUv), texture2D(txtrlightsscatter, vUv), cloudAlpha);
 
-	float lightVal = clamp( texture2D(txtrlightsoffset, vUv).r + ((addedLightMask * 2.0)-1.0), 0.0, 1.0 );
-	lightVal = (floor(lightVal) + lightVal)*0.5;
-
+	float lightVal = clamp(pow(addedLightMask,5.0),0.0,1.0);
+	lightVal = clamp( texture2D(txtrlightsoffset, vUv).r + (( lightVal * 2.0)-1.0), 0.0, 1.0 );
+	//lightVal = (floor(lightVal) + lightVal)*0.5;
+	lightVal = floor(lightVal)*0.7 + lightVal*0.3;
 	//glowNight *= vec4(1.0 - pow(addedLambert, 8.0), 1.0);
 	lights = lights*lightVal;
 
@@ -288,7 +287,9 @@ void main() {
 	
 	gl_FragColor = surfaceDiffuse;
 
-	///gl_FragColor = texture2D(txtrclouds, vUv);
+	//gl_FragColor = vec4(lightVal);
+
+	////gl_FragColor = texture2D(txtrclouds, vUv);
 	
 	//gl_FragColor += vec4(addedSunsetRim,addedSunsetRim,addedSunsetRim,1.0); 
 

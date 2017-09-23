@@ -141,10 +141,10 @@ var createPlanet = function() {
     // }
 
     planet.o.update = function(_clock) {
-        planet.rotation.y += _clock.timeScale(2);
+        planet.rotation.y += _clock.timeScale(0.1);
 
         //Update Clouds
-        //planet.o.cloudDisplacementOffset += _clock.timeScale(0.04);
+        planet.o.cloudDisplacementOffset += _clock.timeScale(0.04);
         planet.o.cloudDisplacementOffset = planet.o.cloudDisplacementOffset % 1;
 
         planet.o.material.uniforms.clouddisp.value = planet.o.cloudDisplacementOffset;
