@@ -160,6 +160,9 @@ function init() {
     });
     renderer.autoClear = false;
 
+    //Needed for planet shader
+    //renderer.context.getExtension('OES_standard_derivatives');
+
     //append renderer to the screen
     renderer.setSize(e_screen.width(), e_screen.height());
     e_screen.append(renderer.domElement);

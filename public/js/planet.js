@@ -75,7 +75,7 @@ var createPlanet = function() {
                     value: null
                 },
 
-                clouddispscale: {
+                clouddisp: {
                     type: 'f',
                     value: 0.0
                 },
@@ -87,6 +87,8 @@ var createPlanet = function() {
         transparent: false,
         lights: true
     });
+
+
 
     //-------Assign Texturez
     material.uniforms.txtrdiff.value = texture_diff;
@@ -105,7 +107,7 @@ var createPlanet = function() {
     material.uniforms.coloratmoscatter1.value = new THREE.Color('#ff2400');
     material.uniforms.coloratmoscatter2.value = new THREE.Color('#0066ff');
     material.uniforms.hovercolor.value = new THREE.Color('#000000');
-    material.uniforms.clouddispscale.value = 0;
+    material.uniforms.clouddisp.value = 0;
 
     //------Build Mesh
 
@@ -139,16 +141,13 @@ var createPlanet = function() {
     // }
 
     planet.o.update = function(_clock) {
-        planet.rotation.y += _clock.timeScale(0.25);
+        planet.rotation.y += _clock.timeScale(2);
 
         //Update Clouds
-        planet.o.cloudDisplacementOffset += _clock.timeScale(0.15);
-        if (planet.o.cloudDisplacementOffset >= 1.0) {
-            planet.o.cloudDisplacementOffset -= 1.0;
-        } else if (planet.o.cloudDisplacementOffset <= 0) {
-            planet.o.cloudDisplacementOffset += 1.0;
-        }
-        planet.o.material.uniforms.clouddispscale.value = planet.o.cloudDisplacementOffset;
+        //planet.o.cloudDisplacementOffset += _clock.timeScale(0.04);
+        planet.o.cloudDisplacementOffset = planet.o.cloudDisplacementOffset % 1;
+
+        planet.o.material.uniforms.clouddisp.value = planet.o.cloudDisplacementOffset;
     }
 
     // //Display
