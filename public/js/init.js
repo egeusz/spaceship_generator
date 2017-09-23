@@ -76,12 +76,12 @@ function init() {
 
 
     var light_sun = new THREE.DirectionalLight(0xffffff);
-    light_sun.position.set(1, 1, 1).normalize();
+    light_sun.position.set(0, 0, 1).normalize();
     scene.add(light_sun);
 
 
     // var light_blue = new THREE.DirectionalLight(0x99ccff);
-    // light_blue.position.set(-1, -1, -1).normalize();
+    // light_blue.position.set(-1, -0.5, 1).normalize();
     // scene.add(light_blue);
 
 
@@ -104,27 +104,27 @@ function init() {
     //scene.add(mesh);
 
 
-    {
-        var ball_material = new THREE.MeshPhongMaterial({
-            color: 0x8888FF,
-            specular: 0xFFFFFF,
-            shininess: 30,
-            flatShading: false
-        });
-        //ball_material.color = new THREE.Color('#65adff');
-        var ball_geometry = new THREE.SphereGeometry(1, 64, 64);
-        var ball_mesh = new THREE.Mesh(ball_geometry, ball_material);
+    // {
+    //     var ball_material = new THREE.MeshPhongMaterial({
+    //         color: 0x8888FF,
+    //         specular: 0xFFFFFF,
+    //         shininess: 30,
+    //         flatShading: false
+    //     });
+    //     //ball_material.color = new THREE.Color('#65adff');
+    //     var ball_geometry = new THREE.SphereGeometry(1, 64, 64);
+    //     var ball_mesh = new THREE.Mesh(ball_geometry, ball_material);
 
-        ball_mesh.scale.x = 100;
-        ball_mesh.scale.y = 100;
-        ball_mesh.scale.z = 100;
+    //     ball_mesh.scale.x = 100;
+    //     ball_mesh.scale.y = 100;
+    //     ball_mesh.scale.z = 100;
 
-        ball_mesh.position.x = 200;
-        ball_mesh.position.y = 0;
-        ball_mesh.position.z = 0;
+    //     ball_mesh.position.x = 200;
+    //     ball_mesh.position.y = 0;
+    //     ball_mesh.position.z = 0;
 
-        scene.add(ball_mesh);
-    }
+    //     scene.add(ball_mesh);
+    // }
 
 
 
@@ -172,7 +172,33 @@ function init() {
 
     cameraControls = new CameraControls(e_screen, camera_root);
 
-    animate();
+
+    var game = {};
+
+    var clock = new Clock(game);
+
+    game.loop = function(_clock) {
+
+        stats.begin();
+
+        cameraControls.update();
+        camera_bg.quaternion.copy(camera_root.quaternion);
+
+
+        planet.o.update(clock);
+
+
+
+
+        renderer.render(scene_bg, camera_bg);
+        renderer.clearDepth();
+        renderer.render(scene, camera);
+
+
+        stats.end();
+    }
+
+    clock.start();
 }
 
 
@@ -184,25 +210,4 @@ function onWindowResize() {
     camera_bg.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-
-
-
-
-function animate() {
-
-    stats.begin();
-
-    requestAnimationFrame(animate);
-
-    cameraControls.update();
-    camera_bg.quaternion.copy(camera_root.quaternion);
-
-    renderer.render(scene_bg, camera_bg);
-    renderer.clearDepth();
-    renderer.render(scene, camera);
-
-
-    stats.end();
 }

@@ -3,58 +3,37 @@ var createPlanet = function() {
 
     var texture_url = "/images/textures/planet/";
 
-    var texture_diff = new THREE.TextureLoader().load(texture_url + "carpathia_diff.png");
-    var texture_spec = new THREE.TextureLoader().load(texture_url + "carpathia_spec.png");
-    var texture_clouds = new THREE.TextureLoader().load(texture_url + "earth_clouds.png");
+    var texture_diff = new THREE.TextureLoader().load(texture_url + "earth_diff_lg.jpg");
+    var texture_spec = new THREE.TextureLoader().load(texture_url + "earth_spec_lg.jpg");
+
+    var texture_clouds = new THREE.TextureLoader().load(texture_url + "earth_clouds_lg.png");
     var texture_cloud_disp = new THREE.TextureLoader().load(texture_url + "cloud_disp.png");
 
-    var texture_glow_night = new THREE.TextureLoader().load(texture_url + "carpathia_glow_night.png");
-    var texture_glow_day = new THREE.TextureLoader().load(texture_url + "carpathia_glow_day.png");
+    var texture_lights = new THREE.TextureLoader().load(texture_url + "earth_glow_lg.jpg");
+    var texture_lights_scatter = new THREE.TextureLoader().load(texture_url + "earth_glow_scatter.jpg");
+    var texture_lights_offset = new THREE.TextureLoader().load(texture_url + "lightswitch_offset.jpg");
+
+    var texture_glow = new THREE.TextureLoader().load(texture_url + "carpathia_glow_day.png");
     var texture_glow_scatter = new THREE.TextureLoader().load(texture_url + "carpathia_glow_scatter.png");
 
-
-    //------- Object Parameters
-    //Doing this to keep my sloppy ass from overriding any THREE stuff in THREE.Object3D
-    //vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    // planet.o = {};
-    // planet.o.id 					  = _id;
-    // planet.o.rotationSpeed            = _data.rotation;
-    // planet.o.dispSpeed 	              = _data.wind*0.25;
-    // planet.o.cloudDisplacementOffset  = 0.0;
-
-    // //info
-    // planet.o.name 					  =_data.name;
-    // planet.o.description 			  =_data.description;
-
-
-
-    // planet.o.size 			          =_data.size;
-    // planet.o.screenPosition 		  = new THREE.Vector2();
-    // planet.o.distance 		          = 0;
-    // planet.o.screenSize 		      = 0;
-
-    // planet.o.spawner                  =_spawner;
-
-    // if(_assetList.text[_id+"_details"])
-    // {
-    // 	planet.o.details   =   _assetList.text[_id+"_details"];
-    // }
-
-
-    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    //-------Build Material
-    //var material = new THREE.MeshBasicMaterial( { map: _assetList.texture[_id+'_diff'] } );
-    /*
-    var material = new THREE.ShaderMaterial({
+    //-------------------------------------------
+    material = new THREE.ShaderMaterial({
         uniforms: THREE.UniformsUtils.merge([
             THREE.UniformsLib['lights'],
             THREE.UniformsLib['ambient'], {
-                atmoColor: {
+                coloratmo: {
                     type: 'c',
                     value: 0.0
                 },
-                hoverColor: {
+                coloratmoscatter1: {
+                    type: 'c',
+                    value: 0.0
+                },
+                coloratmoscatter2: {
+                    type: 'c',
+                    value: 0.0
+                },
+                hovercolor: {
                     type: 'c',
                     value: 0.0
                 },
@@ -75,11 +54,19 @@ var createPlanet = function() {
                     type: 't',
                     value: null
                 },
-                txtrglowday: {
+                txtrlights: {
                     type: 't',
                     value: null
                 },
-                txtrglownight: {
+                txtrlightsscatter: {
+                    type: 't',
+                    value: null
+                },
+                txtrlightsoffset: {
+                    type: 't',
+                    value: null
+                },
+                txtrglow: {
                     type: 't',
                     value: null
                 },
@@ -92,77 +79,57 @@ var createPlanet = function() {
                     type: 'f',
                     value: 0.0
                 },
-
             }
         ]),
-        //vertexShader: document.getElementById('planet_vertexShader').text,
-        //fragmentShader: document.getElementById('planet_fragmentShader').text,
         vertexShader: planet_vs,
         fragmentShader: planet_fs,
-        //vertexShader: _assetList.shader['planet_vert'],
-        //fragmentShader: _assetList.shader['planet_frag'],
+
         transparent: false,
         lights: true
     });
+
     //-------Assign Texturez
     material.uniforms.txtrdiff.value = texture_diff;
     material.uniforms.txtrspec.value = texture_spec;
     material.uniforms.txtrclouds.value = texture_clouds;
     material.uniforms.txtrclouddisp.value = texture_cloud_disp;
 
-    material.uniforms.txtrglownight.value = texture_glow_night;
-    material.uniforms.txtrglowday.value = texture_glow_day;
+    material.uniforms.txtrlights.value = texture_lights;
+    material.uniforms.txtrlightsscatter.value = texture_lights_scatter;
+    material.uniforms.txtrlightsoffset.value = texture_lights_offset;
+
+    material.uniforms.txtrglow.value = texture_glow;
     material.uniforms.txtrglowscatter.value = texture_glow_scatter;
 
-    material.uniforms.atmoColor.value = new THREE.Color('#65adff');
-    material.uniforms.hoverColor.value = new THREE.Color('#000000');
+    material.uniforms.coloratmo.value = new THREE.Color('#65adff');
+    material.uniforms.coloratmoscatter1.value = new THREE.Color('#ff2400');
+    material.uniforms.coloratmoscatter2.value = new THREE.Color('#0066ff');
+    material.uniforms.hovercolor.value = new THREE.Color('#000000');
     material.uniforms.clouddispscale.value = 0;
-	*/
-
-    //-------------------------------------------
-    //material = new THREE.MeshPhongMaterial();
-    material = new THREE.ShaderMaterial({
-        uniforms: THREE.UniformsUtils.merge([
-            THREE.UniformsLib['lights'],
-            THREE.UniformsLib['ambient'],
-        ]),
-        //vertexShader: document.getElementById('planet_vertexShader').text,
-        //fragmentShader: document.getElementById('planet_fragmentShader').text,
-        vertexShader: planet_vs,
-        fragmentShader: planet_fs,
-        //vertexShader: _assetList.shader['planet_vert'],
-        //fragmentShader: _assetList.shader['planet_frag'],
-        transparent: false,
-        lights: true
-    });
-
-
-    //material = new THREE.MeshPhongMaterial();
-    material.color = new THREE.Color('#65adff');
 
     //------Build Mesh
-    //var mesh = new THREE.Mesh(_assetList.obj.planet_obj.children[0].children[2].geometry, material);
 
-    var geometry = new THREE.SphereGeometry(1, 64, 64);
-
-
+    var geometry = new THREE.SphereGeometry(1, 128, 128);
 
     var mesh = new THREE.Mesh(geometry, material);
 
-    mesh.scale.x = 100;
-    mesh.scale.y = 100;
-    mesh.scale.z = 100;
+    mesh.scale.x = 300;
+    mesh.scale.y = 300;
+    mesh.scale.z = 300;
 
     planet.add(mesh);
 
     planet.position.x = 0;
     planet.position.y = 0;
-    planet.position.z = -3;
+    planet.position.z = 0;
 
-    //console.log(THREE.ShaderChunk);
+    //------Functions
+    planet.o = {
+        material: material,
+        cloudDisplacementOffset: 0,
+    };
 
-    // //------Functions
-    // //Setup
+    // //Setup4
     // planet.o.updateSceenPosition = function(_sceneRaycaster) {
 
     //     planet.o.screenPosition = _sceneRaycaster.getScreenLocation(planet.position);
@@ -171,20 +138,18 @@ var createPlanet = function() {
 
     // }
 
-    // planet.o.update = function(_clock) {
-    //     planet.rotation.y += _clock.timeScale(planet.o.rotationSpeed);
+    planet.o.update = function(_clock) {
+        planet.rotation.y += _clock.timeScale(0.25);
 
-
-
-    //     //Update Clouds
-    //     planet.o.cloudDisplacementOffset += _clock.timeScale(planet.o.dispSpeed);
-    //     if (planet.o.cloudDisplacementOffset >= 1.0) {
-    //         planet.o.cloudDisplacementOffset -= 1.0;
-    //     } else if (planet.o.cloudDisplacementOffset <= 0) {
-    //         planet.o.cloudDisplacementOffset += 1.0;
-    //     }
-    //     planet.o.material.uniforms.clouddispscale.value = planet.o.cloudDisplacementOffset;
-    // }
+        //Update Clouds
+        planet.o.cloudDisplacementOffset += _clock.timeScale(0.15);
+        if (planet.o.cloudDisplacementOffset >= 1.0) {
+            planet.o.cloudDisplacementOffset -= 1.0;
+        } else if (planet.o.cloudDisplacementOffset <= 0) {
+            planet.o.cloudDisplacementOffset += 1.0;
+        }
+        planet.o.material.uniforms.clouddispscale.value = planet.o.cloudDisplacementOffset;
+    }
 
     // //Display
     // planet.o.setStyleOnHovered = function() {
