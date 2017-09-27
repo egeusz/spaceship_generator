@@ -25,43 +25,14 @@ uniform vec3   coloratmoscatter2;
 uniform vec3   hovercolor;
 uniform float  clouddisp;
 
-/*
-uniform sampler2D bumpMap;
+uniform sampler2D txtrbump;
 uniform float bumpScale;
 
+// Derivative maps - bump mapping unparametrized surfaces by Morten Mikkelsen
+// http://mmikkelsen3d.blogspot.sk/2011/07/derivative-maps.html
 
-vec2 dHdxy_fwd() {
+// Evaluate the derivative of the height w.r.t. screen-space using forward differencing (listing 2)
 
-	vec2 dSTdx = dFdx( vUv );
-	vec2 dSTdy = dFdy( vUv );
-
-	float Hll = bumpScale * texture2D( bumpMap, vUv ).x;
-	float dBx = bumpScale * texture2D( bumpMap, vUv + dSTdx ).x - Hll;
-	float dBy = bumpScale * texture2D( bumpMap, vUv + dSTdy ).x - Hll;
-
-	return vec2( dBx, dBy );
-
-}
-
-
-vec3 perturbNormalArb( vec3 surf_pos, vec3 surf_norm, vec2 dHdxy ) {
-
-	// Workaround for Adreno 3XX dFd*( vec3 ) bug. See #9988
-
-	vec3 vSigmaX = vec3( dFdx( surf_pos.x ), dFdx( surf_pos.y ), dFdx( surf_pos.z ) );
-	vec3 vSigmaY = vec3( dFdy( surf_pos.x ), dFdy( surf_pos.y ), dFdy( surf_pos.z ) );
-	vec3 vN = surf_norm;		// normalized
-
-	vec3 R1 = cross( vSigmaY, vN );
-	vec3 R2 = cross( vN, vSigmaX );
-
-	float fDet = dot( vSigmaX, R1 );
-
-	vec3 vGrad = sign( fDet ) * ( dHdxy.x * R1 + dHdxy.y * R2 );
-	return normalize( abs( fDet ) * surf_norm - vGrad );
-
-}
-*/
 
 
 #if NUM_DIR_LIGHTS > 0
@@ -106,12 +77,47 @@ varying vec3 viewNormal;
 varying vec3 viewVertPos;
 
 
+vec2 dHdxy_fwd() {
+
+	vec2 dSTdx = dFdx( vUv );
+	vec2 dSTdy = dFdy( vUv );
+
+	float Hll = bumpScale * texture2D( txtrbump, vUv ).x;
+	float dBx = bumpScale * texture2D( txtrbump, vUv + dSTdx ).x - Hll;
+	float dBy = bumpScale * texture2D( txtrbump, vUv + dSTdy ).x - Hll;
+
+	return vec2( dBx, dBy );
+
+}
+
+vec3 perturbNormalArb( vec3 surf_pos, vec3 surf_norm, vec2 dHdxy ) {
+
+	// Workaround for Adreno 3XX dFd*( vec3 ) bug. See #9988
+
+	vec3 vSigmaX = vec3( dFdx( surf_pos.x ), dFdx( surf_pos.y ), dFdx( surf_pos.z ) );
+	vec3 vSigmaY = vec3( dFdy( surf_pos.x ), dFdy( surf_pos.y ), dFdy( surf_pos.z ) );
+	vec3 vN = surf_norm;		// normalized
+
+	vec3 R1 = cross( vSigmaY, vN );
+	vec3 R2 = cross( vN, vSigmaX );
+
+	float fDet = dot( vSigmaX, R1 );
+
+	vec3 vGrad = sign( fDet ) * ( dHdxy.x * R1 + dHdxy.y * R2 );
+	return normalize( abs( fDet ) * surf_norm - vGrad );
+
+}
+
+
+
 void main() {
 
-	float cloudHeight = 2.0;
+	float cloudHeight = 20.0;
 
 
 	//----------
+	vec3 viewNormalBump = viewNormal;
+	viewNormalBump = perturbNormalArb( viewVertPos, viewNormalBump, dHdxy_fwd() );
 
 	vec3 worldViewDirection = normalize(cameraPosition - worldVertPos);
 	vec3 cameraViewDirection = normalize(viewVertPos); 
@@ -165,6 +171,7 @@ void main() {
 	vec3 addedSpecSurface = vec3(0,0,0);
 
 	vec3 addedLambert = vec3(0,0,0);
+	vec3 addedLambertBump = vec3(0,0,0);
 	//vec3 addedLambertBack = vec3(0,0,0);
 
 	//vec3 addedLambertGlowMask = vec3(0,0,0);
@@ -172,14 +179,16 @@ void main() {
 	float addedLightMask = 0.0;
 	float addedSunsetRim = 0.0;
 
-	float addedcloudShadow = 0.0;
+
 
 	vec3 addedCrepuscularScatter = vec3(0,0,0);
 
-
-
-
-
+	float addedcloudShadow = 0.0;
+	vec2 dSTdx = dFdx( vUv );
+	vec2 dSTdy = dFdy( vUv );
+	vec3 uvX = vec3(dSTdx, 0.0);
+	vec3 uvY = vec3(dSTdy, 0.0);
+	
 	#if NUM_DIR_LIGHTS > 0
 		for(int i = 0; i < NUM_DIR_LIGHTS; i++) {
 
@@ -187,10 +196,11 @@ void main() {
 
 			//---Diff
 			float lambert     = clamp(dot( lightDirection , viewNormal), 0.0, 1.0);
+			float lambertBump = clamp(dot( lightDirection , viewNormalBump), 0.0, 1.0);
 			float lambertBack  = clamp(dot( -lightDirection , viewNormal), 0.0, 1.0);
 
 			addedLambert += clamp( lambert * directionalLights[ i ].color, 0.0, 1.0);
-			
+			addedLambertBump += clamp( lambertBump * directionalLights[ i ].color, 0.0, 1.0);
 			//addedLambertBack += lambertBack;
 
 
@@ -204,22 +214,20 @@ void main() {
 			addedSunsetRim += sunset;
 			
 			//---Cloud Shadow
-			/*
-			float shadowOffsetU = dot( -lightDirection, bitanU)*cloudHeight;
-			float shadowOffsetV = dot( -lightDirection, bitanV)*cloudHeight;
+			float shadowOffsetU = dot( lightDirection, uvX)*cloudHeight;
+			float shadowOffsetV = dot( lightDirection, uvY)*cloudHeight;
 
-			vec2 vUv_shadow_offset = vec2(vUv_offset.s + shadowOffsetU, vUv_offset.t + shadowOffsetV);
+			vec2 vUv_shadow_offset = vec2(vUv_offset.s - shadowOffsetU, vUv_offset.t - shadowOffsetV);
 			vUv_shadow_offset = mod(vUv_shadow_offset,1.0);
 
 			addedcloudShadow +=  (1.0 - texture2D( txtrclouds, vUv_shadow_offset ).a);
-			*/
 
 			//---Spec
-			float specular = clamp(dot(reflect(lightDirection, viewNormal), cameraViewDirection),0.0, 1.0);
+			float specular = clamp(dot(reflect(lightDirection, viewNormalBump), cameraViewDirection),0.0, 1.0);
 
-			float specular_atmo = pow(specular, 15.0)*pow(faceRatioInv, 4.0);
+			float specular_atmo = pow(specular, 10.0)*pow(faceRatioInv, 4.0);
 			float specular_cloud = pow(specular, 4.0)*pow(faceRatio, 1.5)*0.3;
-			float specular_surface = pow(specular, 25.0)*pow(faceRatio, 1.5);
+			float specular_surface = pow(specular, 15.0)*pow(faceRatio, 1.5);
 
 			addedSpecAtmo += clamp( specular_atmo * directionalLights[ i ].color, 0.0, 1.0);
 			addedSpecCloud += clamp( specular_cloud * directionalLights[ i ].color, 0.0, 1.0);
@@ -232,41 +240,50 @@ void main() {
 	//-----------------
 
 	//add atmosphere haze based on facing ratio
-	vec4 atmoHaze = vec4(coloratmo, 1.0);
-	vec4 surfaceColor = mix( texture2D(txtrdiff, vUv), atmoHaze, faceRatioInv);
+	//vec3 atmoHaze = vec4(coloratmo);
+	
+	//vec4 surfaceTexture = mix( texture2D(txtrdiff, vUv), atmoHaze, faceRatioInv);
+
+	vec4 surfaceTexture = texture2D(txtrdiff, vUv);
 
 	//add sunset color to surface
-	surfaceColor =  mix( surfaceColor, vec4(coloratmoscatter1, 1.0), pow(addedSunsetRim,6.0) );//*addedcloudShadow;
+	surfaceTexture =  mix( surfaceTexture, vec4(coloratmoscatter1, 1.0), pow(addedSunsetRim,8.0) );//*addedcloudShadow;
 
 	//add sunset color to clouds
-	cloudTexture =  mix( cloudTexture, vec4(coloratmoscatter1, 1.0), pow(addedSunsetRim,5.0) );
+	cloudTexture =  mix( cloudTexture, vec4(coloratmoscatter1, 1.0), pow(addedSunsetRim,6.0) );
 
 	//-----------------
 	//process lambert
 	
-	surfaceColor = mix( surfaceColor, cloudTexture,  cloudTexture.a );
+	//--cloud shadows
 
 
-	vec4 surfaceDiffuse = vec4(addedLambert, 1.0)*surfaceColor;
+	vec4 surfaceDiffuse = vec4(addedLambertBump, 1.0)*surfaceTexture*addedcloudShadow;
+
+	vec4 atmoHazeDiffuse = vec4(coloratmo*addedLambert, 1.0);
+	surfaceDiffuse = mix(surfaceDiffuse, atmoHazeDiffuse, faceRatioInv);
 
 
+	vec4 cloudDiffuse = vec4(addedLambert, 1.0)*cloudTexture;
 
-	//vec3 nightscatter = vec3(1.0,1.0,1.0) - addedLambertBack - addedLambert;
-	//vec4 nightscatter = vec4(addedLambert*surfaceColor, 1.0);
+	surfaceDiffuse = mix( surfaceDiffuse, cloudDiffuse,  cloudTexture.a );
 
-	vec4 atmoNightScatter = vec4(addedCrepuscularScatter*coloratmoscatter2*0.2, 1.0);
+	
+	//-----------------
+	//Atmo scatter
+	vec4 atmoNightScatter = vec4(addedCrepuscularScatter*coloratmoscatter2*0.1, 1.0);
 
-
-
+	vec4 atmoScatter = vec4(addedSpecAtmo*coloratmoscatter1, 1.0);
 
 
 	//-----------------
 	//Specular
-	vec4 atmoScatter = vec4(addedSpecAtmo*coloratmoscatter1, 1.0);
+
+	vec4 surfaceSpec = vec4(addedSpecSurface, 1.0)*texture2D(txtrspec, vUv)*cloudAlphaInv*0.25*addedcloudShadow;
 
 	vec4 cloudSpec = vec4(addedSpecCloud, 1.0)*(cloudTexture.a);
 
-	vec4 surfaceSpec = vec4(addedSpecSurface, 1.0)*texture2D(txtrspec, vUv)*cloudAlphaInv*0.5;
+	
 
 	//-----------------
 	//Glow

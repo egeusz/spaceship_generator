@@ -5,16 +5,17 @@ var createPlanet = function() {
 
     var texture_diff = new THREE.TextureLoader().load(texture_url + "earth_diff_lg.jpg");
     var texture_spec = new THREE.TextureLoader().load(texture_url + "earth_spec_lg.jpg");
+    var texture_bump = new THREE.TextureLoader().load(texture_url + "earth_bump_lg.jpg");
 
     var texture_clouds = new THREE.TextureLoader().load(texture_url + "earth_clouds_lg.png");
-    var texture_cloud_disp = new THREE.TextureLoader().load(texture_url + "cloud_disp.png");
+    var texture_cloud_disp = new THREE.TextureLoader().load(texture_url + "cloud_disp2.png");
 
     var texture_lights = new THREE.TextureLoader().load(texture_url + "earth_glow_lg.jpg");
     var texture_lights_scatter = new THREE.TextureLoader().load(texture_url + "earth_glow_scatter.jpg");
     var texture_lights_offset = new THREE.TextureLoader().load(texture_url + "lightswitch_offset.jpg");
 
-    var texture_glow = new THREE.TextureLoader().load(texture_url + "carpathia_glow_day.png");
-    var texture_glow_scatter = new THREE.TextureLoader().load(texture_url + "carpathia_glow_scatter.png");
+    //var texture_glow = new THREE.TextureLoader().load(texture_url + "carpathia_glow_day.png");
+    //var texture_glow_scatter = new THREE.TextureLoader().load(texture_url + "carpathia_glow_scatter.png");
 
     //-------------------------------------------
     material = new THREE.ShaderMaterial({
@@ -45,6 +46,14 @@ var createPlanet = function() {
                 txtrspec: {
                     type: 't',
                     value: null
+                },
+                txtrbump: {
+                    type: 't',
+                    value: null
+                },
+                bumpScale: {
+                    type: 'f',
+                    value: 0.0
                 },
                 txtrclouds: {
                     type: 't',
@@ -93,6 +102,7 @@ var createPlanet = function() {
     //-------Assign Texturez
     material.uniforms.txtrdiff.value = texture_diff;
     material.uniforms.txtrspec.value = texture_spec;
+    material.uniforms.txtrbump.value = texture_bump;
     material.uniforms.txtrclouds.value = texture_clouds;
     material.uniforms.txtrclouddisp.value = texture_cloud_disp;
 
@@ -100,14 +110,16 @@ var createPlanet = function() {
     material.uniforms.txtrlightsscatter.value = texture_lights_scatter;
     material.uniforms.txtrlightsoffset.value = texture_lights_offset;
 
-    material.uniforms.txtrglow.value = texture_glow;
-    material.uniforms.txtrglowscatter.value = texture_glow_scatter;
+    //material.uniforms.txtrglow.value = texture_glow;
+    //material.uniforms.txtrglowscatter.value = texture_glow_scatter;
 
     material.uniforms.coloratmo.value = new THREE.Color('#65adff');
     material.uniforms.coloratmoscatter1.value = new THREE.Color('#ff2400');
     material.uniforms.coloratmoscatter2.value = new THREE.Color('#0066ff');
     material.uniforms.hovercolor.value = new THREE.Color('#000000');
     material.uniforms.clouddisp.value = 0;
+
+    material.uniforms.bumpScale.value = 0.5;
 
     //------Build Mesh
 
@@ -141,10 +153,10 @@ var createPlanet = function() {
     // }
 
     planet.o.update = function(_clock) {
-        planet.rotation.y += _clock.timeScale(0.1);
+        planet.rotation.y += _clock.timeScale(0.5);
 
         //Update Clouds
-        planet.o.cloudDisplacementOffset += _clock.timeScale(0.04);
+        //planet.o.cloudDisplacementOffset += _clock.timeScale(0.04);
         planet.o.cloudDisplacementOffset = planet.o.cloudDisplacementOffset % 1;
 
         planet.o.material.uniforms.clouddisp.value = planet.o.cloudDisplacementOffset;

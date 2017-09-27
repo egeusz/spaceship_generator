@@ -17,7 +17,7 @@ function CameraControls(e_screen, camera_root) {
     camera.position.setZ(zoomPos);
 
     this.zoomMax = 7000;
-    this.zoomMin = 500;
+    this.zoomMin = 425;
     //this.zoomMin_stopbuffer = 500;
     this.zoomSpeed = 400;
 
