@@ -77,13 +77,13 @@ function init() {
 
     var light_sun = new THREE.DirectionalLight(0xffffff);
     light_sun.position.set(0, 0, 1).normalize();
+    light_sun.intensity = 2.0;
     scene.add(light_sun);
 
 
     // var light_blue = new THREE.DirectionalLight(0x99ccff);
-    // light_blue.position.set(-1, -0.5, 1).normalize();
+    // light_blue.position.set(1, 0, 1).normalize();
     // scene.add(light_blue);
-
 
     camera_root = new THREE.Object3D();
 
