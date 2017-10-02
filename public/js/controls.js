@@ -17,9 +17,9 @@ function CameraControls(e_screen, camera_root) {
     camera.position.setZ(zoomPos);
 
     this.zoomMax = 7000;
-    this.zoomMin = 425;
+    this.zoomMin = 375;
     //this.zoomMin_stopbuffer = 500;
-    this.zoomSpeed = 400;
+    this.zoomSpeed = 150;
 
     e_screen.on("mousedown", function(event) {
         mouseIsDown = true;

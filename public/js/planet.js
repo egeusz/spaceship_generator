@@ -7,16 +7,15 @@ var createPlanet = function() {
     var texture_spec = new THREE.TextureLoader().load(texture_url + "earth_spec_xl.jpg");
     var texture_bump = new THREE.TextureLoader().load(texture_url + "earth_bump_xl.jpg");
 
-    var texture_clouds = new THREE.TextureLoader().load(texture_url + "earth_clouds_xl.png");
-    //var texture_clouds = new THREE.TextureLoader().load(texture_url + "earth_clouds.png");
+    var texture_cloud_bump = new THREE.TextureLoader().load(texture_url + "cloud_bump.jpg");
+
+    var texture_clouds = new THREE.TextureLoader().load(texture_url + "earth_clouds2_xl.png");
+    var texture_clouds_alpha_noise = new THREE.TextureLoader().load(texture_url + "cloud_alpha_noise.jpg");
     var texture_cloud_disp = new THREE.TextureLoader().load(texture_url + "cloud_disp2.png");
 
     var texture_lights = new THREE.TextureLoader().load(texture_url + "earth_glow_xl.jpg");
     var texture_lights_scatter = new THREE.TextureLoader().load(texture_url + "earth_glow_scatter.jpg");
-    var texture_lights_offset = new THREE.TextureLoader().load(texture_url + "lightswitch_offset.jpg");
-
-    //var texture_glow = new THREE.TextureLoader().load(texture_url + "carpathia_glow_day.png");
-    //var texture_glow_scatter = new THREE.TextureLoader().load(texture_url + "carpathia_glow_scatter.png");
+    var texture_lights_offset = new THREE.TextureLoader().load(texture_url + "lightswitch_offset2.jpg");
 
     //-------------------------------------------
     material = new THREE.ShaderMaterial({
@@ -33,16 +32,20 @@ var createPlanet = function() {
                     value: null
                 },
                 //------------------
-                map_bump: {
+                map_surface_bump: {
                     type: 't',
                     value: null
                 },
-                bumpScale: {
+                surface_bump_scale: {
                     type: 'f',
                     value: 0.0
                 },
                 //------------------
                 map_clouds: {
+                    type: 't',
+                    value: null
+                },
+                map_cloud_noise: {
                     type: 't',
                     value: null
                 },
@@ -60,6 +63,15 @@ var createPlanet = function() {
                 },
                 color_cloud_shadow: {
                     type: 'c',
+                    value: 0.0
+                },
+                //------------------
+                map_cloud_bump: {
+                    type: 't',
+                    value: null
+                },
+                cloud_bump_scale: {
+                    type: 'f',
                     value: 0.0
                 },
                 //------------------
@@ -88,8 +100,10 @@ var createPlanet = function() {
                     type: 't',
                     value: null
                 },
-
-
+                color_lights_brightness: {
+                    type: 'c',
+                    value: 0.0
+                },
             }
         ]),
         vertexShader: planet_vs,
@@ -103,16 +117,38 @@ var createPlanet = function() {
 
     //-------Assign Texturez
     material.uniforms.map_diff.value = texture_diff;
-    material.uniforms.map_spec.value = texture_spec;
+    material.uniforms.map_diff.value.wrapS = THREE.RepeatWrapping;
+    material.uniforms.map_diff.value.wrapT = THREE.RepeatWrapping;
 
-    material.uniforms.map_bump.value = texture_bump;
-    material.uniforms.bumpScale.value = 0.5;
+    material.uniforms.map_spec.value = texture_spec;
+    material.uniforms.map_spec.value.wrapS = THREE.RepeatWrapping;
+    material.uniforms.map_spec.value.wrapT = THREE.RepeatWrapping;
+
+    material.uniforms.map_surface_bump.value = texture_bump;
+    material.uniforms.map_surface_bump.value.wrapS = THREE.RepeatWrapping;
+    material.uniforms.map_surface_bump.value.wrapT = THREE.RepeatWrapping;
+    material.uniforms.surface_bump_scale.value = 0.3;
 
     material.uniforms.map_clouds.value = texture_clouds;
+    material.uniforms.map_clouds.value.wrapS = THREE.RepeatWrapping;
+    material.uniforms.map_clouds.value.wrapT = THREE.RepeatWrapping;
+
+    material.uniforms.map_cloud_noise.value = texture_clouds_alpha_noise;
+    material.uniforms.map_cloud_noise.value.wrapS = THREE.RepeatWrapping;
+    material.uniforms.map_cloud_noise.value.wrapT = THREE.RepeatWrapping;
+
     material.uniforms.map_cloud_disp.value = texture_cloud_disp;
-    material.uniforms.cloud_height.value = 25;
+    material.uniforms.map_cloud_disp.value.wrapS = THREE.RepeatWrapping;
+    material.uniforms.map_cloud_disp.value.wrapT = THREE.RepeatWrapping;
+
+    material.uniforms.cloud_height.value = 10;
     material.uniforms.cloud_disp.value = 0;
-    material.uniforms.color_cloud_shadow.value = new THREE.Color('#65adff');
+    material.uniforms.color_cloud_shadow.value = new THREE.Color('#557190');
+
+    material.uniforms.map_cloud_bump.value = texture_cloud_bump;
+    material.uniforms.map_cloud_bump.value.wrapS = THREE.RepeatWrapping;
+    material.uniforms.map_cloud_bump.value.wrapT = THREE.RepeatWrapping;
+    material.uniforms.cloud_bump_scale.value = 0.1;
 
     material.uniforms.color_atmo.value = new THREE.Color('#65adff');
     material.uniforms.color_atmoscatter_sunset.value = new THREE.Color('#ff2400');
@@ -121,6 +157,7 @@ var createPlanet = function() {
     material.uniforms.map_lights.value = texture_lights;
     material.uniforms.map_lights_scatter.value = texture_lights_scatter;
     material.uniforms.map_lights_offset.value = texture_lights_offset;
+    material.uniforms.color_lights_brightness.value = new THREE.Color('#958b7e');
 
     //material.uniforms.map_glow.value = texture_glow;
     //material.uniforms.map_glowscatter.value = texture_glow_scatter;

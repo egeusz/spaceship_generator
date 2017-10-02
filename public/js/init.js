@@ -77,7 +77,7 @@ function init() {
 
     var light_sun = new THREE.DirectionalLight(0xffffff);
     light_sun.position.set(0, 0, 1).normalize();
-    light_sun.intensity = 2.0;
+    light_sun.intensity = 1.0;
     scene.add(light_sun);
 
 
