@@ -97,9 +97,9 @@ vec2 dHdxy_fwd_cloud(vec2 vUv_offset, vec2 vUv_tiled) {
 	vec2 dSTdx_tiled = dFdx( vUv_tiled );
 	vec2 dSTdy_tiled = dFdy( vUv_tiled );
 
-	float Hll = cloud_bump_scale * pow(texture2D( map_clouds, vUv_offset ).a, 2.0) * texture2D( map_cloud_bump, vUv_tiled ).r;
-	float dBx = cloud_bump_scale * pow(texture2D( map_clouds, vUv_offset + dSTdx ).a, 2.0) * texture2D( map_cloud_bump, vUv_tiled + dSTdx_tiled ).r - Hll;
-	float dBy = cloud_bump_scale * pow(texture2D( map_clouds, vUv_offset + dSTdy ).a, 2.0) * texture2D( map_cloud_bump, vUv_tiled + dSTdy_tiled ).r - Hll;
+	float Hll = cloud_bump_scale * texture2D( map_cloud_bump, vUv_tiled ).r;
+	float dBx = cloud_bump_scale * texture2D( map_cloud_bump, vUv_tiled + dSTdx_tiled ).r - Hll;
+	float dBy = cloud_bump_scale * texture2D( map_cloud_bump, vUv_tiled + dSTdy_tiled ).r - Hll;
 
 	return vec2( dBx, dBy );
 }
@@ -133,7 +133,7 @@ void main() {
 	//-----------------
 	//---Clouds and Cloud Displacement. 
 
-	float offset = sin( cloud_disp * 2.0 * M_PI )*0.2;
+	float offset = sin( cloud_disp * 2.0 * M_PI )*0.15;
 
 	vec4 cloudDispTexture = texture2D(map_cloud_disp, vUv);
 
@@ -220,12 +220,10 @@ void main() {
 
 
 
-			float sunset = (1.0 -lambertBack - lambert);//ring between both front and back lamberts
+			float sunset = clamp((1.0 -lambertBack - lambert),0.0,1.0);//ring between both front and back lamberts
 			float crepuscularscatter = sunset*0.3 + sunset*0.7*faceRatioInv;
 			addedCrepuscularScatter += clamp( crepuscularscatter * directionalLights[ i ].color, 0.0, 1.0);
 
-			//addedLightMask += 1.0 - lambert;// - pow(sunset,3.0)*0.25;
-			
 			addedSunsetRim += sunset;
 			
 
@@ -245,31 +243,18 @@ void main() {
 
 
 			float specular_atmo = pow(specular, 10.0)*pow(faceRatioInv, 4.0);
-			float specular_cloud = pow(specular, 4.0)*pow(faceRatio, 1.5);
-			float specular_surface = pow(specularBump , 10.0)*pow(faceRatio, 1.5);
+
+			float spec_mask = (pow(faceRatioInv, 1.5)*0.7 + 0.3)*pow(1.0 - lambertBack,25.0);
+			
+			float specular_cloud = pow(specular, 8.0)*spec_mask;
+			float specular_surface = pow(specularBump , 15.0)*spec_mask;
+
 
 			addedSpecAtmo += specular_atmo * directionalLights[ i ].color;
 			addedSpecCloud += specular_cloud * directionalLights[ i ].color;
 			addedSpecSurface += specular_surface * directionalLights[ i ].color;
 		}
 	#endif
-
-	// addedSpecAtmo    = clamp(addedSpecAtmo, 0.0,1.0);
-	// addedSpecCloud   = clamp(addedSpecCloud, 0.0,1.0);
-	// addedSpecSurface = clamp(addedSpecSurface, 0.0,1.0);
-
-	// addedLambert = clamp(addedLambert, 0.0,1.0);
-	// addedLambertSufaceBump = clamp(addedLambertSufaceBump, 0.0,1.0);
-	// addedLambertCloudBump = clamp(addedLambertCloudBump, 0.0,1.0);
-
-	// addedLightMask = clamp(addedLightMask, 0.0,1.0);
-	
-
-	// addedCrepuscularScatter = clamp(addedCrepuscularScatter, 0.0,1.0);
-
-	// addedcloudShadow = clamp(addedcloudShadow, 0.0,1.0);
-
-	//addedSunsetRim = clamp(addedSunsetRim, 0.0,1.0);
 
 	//-----------------
 
@@ -299,18 +284,14 @@ void main() {
 	surfaceDiffuse = mix(surfaceDiffuse, atmoHazeDiffuse, faceRatioInv);
 
 	
-
-	vec3 cloudbump  = mix(color_atmo, color_atmoscatter_sunset,  pow(addedSunsetRim,15.0))*addedLambert;
-	cloudbump = clamp(cloudbump+mix(color_atmoscatter_sunset, vec3(1.0), 1.0-pow(1.0-addedLambert.r,5.0))*addedLambertCloudBump,0.0,1.0);
-	//cloudbump = clamp(cloudbump + (color_atmoscatter_sunset.rgb+addedLambert.rgb)*addedLambertCloudBump, 0.0,1.0);
-
-	//cloudBump = cloudBump + vec4(addedLambertCloudBump*color_atmoscatter_sunset+(1.0-pow(addedSunsetRim,2.0)),1.0);
-	//cloudBump = vec4( test, 1.0 );
-	//atmoHazeDiffuse * vec4(color_atmoscatter_sunset, cloudTexture.a), pow(addedSunsetRim,8.0) );
-	//cloudBump = mix(cloudBump, vec4(addedLambertCloudBump, 1.0), addedLambertCloudBump.r);
+	//cloud bump
+	vec3 cloudbump_basecolor  = mix(color_atmo, color_atmoscatter_sunset,  pow(addedSunsetRim,15.0))*addedLambert;
+	vec3 cloudbump_topcolor = mix(color_atmoscatter_sunset, vec3(1.0), 1.0-pow(1.0-addedLambert.r,5.0)); 
+	vec3 cloudbump = mix(cloudbump_basecolor, cloudbump_topcolor, addedLambertCloudBump.r);
 
 	vec4 cloudDiffuse = cloudTexture*vec4(cloudbump, 1.0);
 	cloudDiffuse.a = cloudTexture.a;
+
 
 	surfaceDiffuse = mix( surfaceDiffuse, cloudDiffuse,  cloudAlpha );
 
@@ -323,9 +304,9 @@ void main() {
 	//-----------------
 	//Specular
 
-	vec4 surfaceSpec = vec4(addedSpecSurface, 1.0)*texture2D(map_spec, vUv)*cloudAlphaInv*addedcloudShadow*0.20;
+	vec4 surfaceSpec = vec4(addedSpecSurface, 1.0)*texture2D(map_spec, vUv)*cloudAlphaInv*addedcloudShadow;
 
-	vec4 cloudSpec = vec4(addedSpecCloud, 1.0)*(cloudTexture.a)*0.3;
+	vec4 cloudSpec = vec4(addedSpecCloud, 1.0)*(cloudTexture.a)*0.5;
 
 	//-----------------
 	//Glow

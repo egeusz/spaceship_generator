@@ -7,6 +7,8 @@ varying vec3 worldVertPos;
 varying vec3 viewNormal;
 varying vec3 viewVertPos;
 
+//varying mat4 modelmatrix;
+
 
 void main(){
 	vUv = uv;
@@ -19,19 +21,7 @@ void main(){
 	viewVertPos = vec3(vertPos4) / vertPos4.w;
 	viewNormal =  normalize(vec3(normalMatrix * vec3(normal)));
 
-	/*
-	viewUV = 
-
-
-	viewU = vec3(normalMatrix * vUv);
-	viewV = vec3(normalMatrix * uv.y);
-
-	//normal_cameraSpace = normalize(modelViewMatrix * vec4(normal, 1.0)).xyz;
-
-	// vec3 objectNormal = vec3( normal );
-	// vec3 transformedNormal = normalMatrix * objectNormal;
-	// vNormal = normalize( transformedNormal );
-	*/
+	//modelmatrix = modelMatrix;
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }

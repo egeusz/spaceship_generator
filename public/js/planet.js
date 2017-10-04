@@ -11,7 +11,7 @@ var createPlanet = function() {
 
     var texture_clouds = new THREE.TextureLoader().load(texture_url + "earth_clouds2_xl.png");
     var texture_clouds_alpha_noise = new THREE.TextureLoader().load(texture_url + "cloud_alpha_noise.jpg");
-    var texture_cloud_disp = new THREE.TextureLoader().load(texture_url + "cloud_disp2.png");
+    var texture_cloud_disp = new THREE.TextureLoader().load(texture_url + "cloud_disp3.png");
 
     var texture_lights = new THREE.TextureLoader().load(texture_url + "earth_glow_xl.jpg");
     var texture_lights_scatter = new THREE.TextureLoader().load(texture_url + "earth_glow_scatter.jpg");
@@ -141,7 +141,7 @@ var createPlanet = function() {
     material.uniforms.map_cloud_disp.value.wrapS = THREE.RepeatWrapping;
     material.uniforms.map_cloud_disp.value.wrapT = THREE.RepeatWrapping;
 
-    material.uniforms.cloud_height.value = 10;
+    material.uniforms.cloud_height.value = 15;
     material.uniforms.cloud_disp.value = 0;
     material.uniforms.color_cloud_shadow.value = new THREE.Color('#557190');
 
