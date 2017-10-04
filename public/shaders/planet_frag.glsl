@@ -192,6 +192,7 @@ void main() {
 	vec3 addedLambert = vec3(0,0,0);
 	vec3 addedLambertSufaceBump = vec3(0,0,0);
 	vec3 addedLambertCloudBump = vec3(0,0,0);
+	vec3 addedLambertBack = vec3(0,0,0);  
 
 	//float addedLightMask = 0.0;
 	float addedSunsetRim = 0.0;
@@ -216,7 +217,7 @@ void main() {
 			addedLambert += clamp( lambert * directionalLights[ i ].color, 0.0, 1.0);
 			addedLambertSufaceBump += clamp( lambertSurfaceBump * directionalLights[ i ].color, 0.0, 1.0);
 			addedLambertCloudBump += clamp( lambertCloudBump * directionalLights[ i ].color, 0.0, 1.0);
-			//addedLambertBack += lambertBack;
+			addedLambertBack += lambertBack;
 
 
 
@@ -313,9 +314,12 @@ void main() {
 
 	vec4 lights = mix(texture2D(map_lights, vUv), texture2D(map_lights_scatter, vUv), cloudAlpha)*vec4(color_lights_brightness,1.0);
 
-	float lightVal = clamp(pow(1.0 - addedLambert.r,8.0),0.0,1.0);
-	lightVal = clamp( texture2D(map_lights_offset, vUv).r + (( lightVal * 2.0)-1.0), 0.0, 1.0 );
-	lightVal = floor(lightVal)*0.8 + lightVal*0.2;
+	float lightVal = clamp(pow(1.0 - addedLambert.r,6.0),0.0,1.0);
+	lightVal = clamp( (texture2D(map_lights_offset, vUv).r - 0.5)*10.0 + (lightVal-0.4)*10.0, 0.0, 1.0 );
+	//lightVal = floor(lightVal)*0.8 + lightVal*0.2;
+
+	//dim the lights around the sunrise edge to fake the brightness a little
+	lightVal = lightVal*addedLambertBack.r*0.5 + lightVal*0.5;
 	lights = lights*lightVal;
 
 	//gl_FragColor = cloudShadowColor;	

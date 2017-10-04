@@ -157,7 +157,7 @@ var createPlanet = function() {
     material.uniforms.map_lights.value = texture_lights;
     material.uniforms.map_lights_scatter.value = texture_lights_scatter;
     material.uniforms.map_lights_offset.value = texture_lights_offset;
-    material.uniforms.color_lights_brightness.value = new THREE.Color('#958b7e');
+    material.uniforms.color_lights_brightness.value = new THREE.Color('#ffffff');
 
     //material.uniforms.map_glow.value = texture_glow;
     //material.uniforms.map_glowscatter.value = texture_glow_scatter;
