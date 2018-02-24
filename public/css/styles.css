@@ -24,3 +24,57 @@
 	overflow: hidden;
 }
 
+.ui{
+	position: absolute;
+	top:0;
+	right:0;
+	width: 250px;
+	height:100%;
+
+	background: rgba(84, 149, 255, 0.25);
+	border-left: solid 1px rgb(84,149,255);
+
+}
+
+
+button {
+    background: none;
+    border: 0;
+    color: inherit;
+    /* cursor: default; */
+    line-height: normal;
+    overflow: visible;
+    padding:0;
+    -webkit-appearance: button; /* for input */
+    -webkit-user-select: none; /* for button */
+       -moz-user-select: none;
+        -ms-user-select: none;
+}
+input::-moz-focus-inner,
+button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+
+
+
+.btn_calculate{
+	float:left;
+	margin: 15px;
+
+	padding:5px;
+	padding-right:15px;
+	padding-left:15px;
+
+	background:rgb(84,149,255);
+
+	color:#fff;
+}
+.btn_calculate:hover{
+	background:rgb(130, 177, 255);
+}
+.btn_calculate:active{
+	background:rgb(0,0,0);
+}
+

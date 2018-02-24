@@ -1,3 +1,20 @@
+function InterfaceControls(e_controls, ship_root) {
+
+    var e_generate_btn = e_controls.find("#btn_generate");
+
+
+
+    e_generate_btn.on('click', function() {
+
+        constructShip(shipspec, ship_root);
+
+    });
+
+    constructShip(shipspec, ship_root);
+
+}
+
+
 function CameraControls(e_screen, camera_root) {
     var self = this;
     var camera = camera_root.children[0];

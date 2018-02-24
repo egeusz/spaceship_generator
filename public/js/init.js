@@ -9,20 +9,20 @@ var camera_bg;
 var renderer;
 
 var camera_root;
+var ship_root;
 
 var cameraControls;
 
 
-var geometry, material, mesh;
-
-
 
 var e_screen;
+var e_controls;
 
 
 function init() {
 
     e_screen = $("#screen");
+    e_controls = $("#controls");
 
 
     scene = new THREE.Scene();
@@ -49,18 +49,13 @@ function init() {
     camera_root.add(camera);
     scene.add(camera_root);
 
+    ship_root = new THREE.Object3D();
+    scene.add(ship_root);
+
     //geometry = new THREE.BoxGeometry(200, 200, 200);
 
     //CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength)
-    geometry = new THREE.CylinderGeometry(50, 50, 200, 6);
-    geometry.computeFlatVertexNormals();
-    material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-    });
 
-    mesh = new THREE.Mesh(geometry, material);
-    mesh.rotateX(toRad(90));
-    scene.add(mesh);
 
 
 
@@ -101,6 +96,8 @@ function init() {
     window.addEventListener('resize', onWindowResize, false);
 
     cameraControls = new CameraControls(e_screen, camera_root);
+
+    interfaceControls = new InterfaceControls(e_controls, ship_root);
 
     animate();
 }
