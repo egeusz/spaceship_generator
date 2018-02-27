@@ -18,6 +18,27 @@ var cameraControls;
 var e_screen;
 var e_controls;
 
+//-----------------------------
+//temp globals - these will be replaced once I implement a real loader
+var planet_fs;
+var planet_vs;
+
+
+
+//-----------------------------
+
+//TO DO -- REPLACE WITH ACTUAL LOADER
+function load() {
+
+    // $.get("/shaders/planet_frag.glsl", function(data) {
+    //     planet_fs = data;
+    //     $.get("/shaders/planet_vert.glsl", function(data) {
+    //         planet_vs = data;
+    //         init();
+    //     });
+    // });
+}
+
 
 function init() {
 
@@ -34,15 +55,14 @@ function init() {
 
 
     var light_sun = new THREE.DirectionalLight(0xffffff);
-    light_sun.position.set(1, 1, 1).normalize();
+    light_sun.position.set(-0.1, 0.2, 1).normalize();
+    light_sun.intensity = 1.0;
     scene.add(light_sun);
 
 
     var light_blue = new THREE.DirectionalLight(0x99ccff);
-    light_blue.position.set(-1, -1, -1).normalize();
+    light_blue.position.set(0.2, -0.5, -1).normalize();
     scene.add(light_blue);
-
-
 
     camera_root = new THREE.Object3D();
 
@@ -52,30 +72,10 @@ function init() {
     ship_root = new THREE.Object3D();
     scene.add(ship_root);
 
-    //geometry = new THREE.BoxGeometry(200, 200, 200);
 
-    //CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength)
-
-
-
-
-    //--------------------------------------------------------------
-    // var geometry_t = new THREE.CylinderGeometry(0, 10, 30, 4, 1);
-    // var material_t = new THREE.MeshPhongMaterial({
-    //     color: 0xffffff,
-    //     flatShading: true
-    // });
-
-    // for (var i = 0; i < 500; i++) {
-    //     var mesh_t = new THREE.Mesh(geometry_t, material_t);
-    //     mesh_t.position.x = (Math.random() - 0.5) * 1000;
-    //     mesh_t.position.y = (Math.random() - 0.5) * 1000;
-    //     mesh_t.position.z = (Math.random() - 0.5) * 1000;
-    //     mesh_t.updateMatrix();
-    //     mesh_t.matrixAutoUpdate = false;
-    //     scene_bg.add(mesh_t);
-    // }
-    //--------------------------------------------------------------
+    //var planet = createPlanet();
+    ////planet.scale = new THREE.Vector3(60, 60, 60);
+    //scene.add(planet);
 
     buildBackground(scene_bg);
 
@@ -84,6 +84,9 @@ function init() {
         antialias: true,
     });
     renderer.autoClear = false;
+
+    //Needed for planet shader
+    //renderer.context.getExtension('OES_standard_derivatives');
 
     //append renderer to the screen
     renderer.setSize(e_screen.width(), e_screen.height());
@@ -99,9 +102,32 @@ function init() {
 
     interfaceControls = new InterfaceControls(e_controls, ship_root);
 
-    animate();
-}
+    //animate();
 
+    var game = {};
+
+    var clock = new Clock(game);
+
+    game.loop = function(_clock) {
+
+        stats.begin();
+
+        cameraControls.update();
+        camera_bg.quaternion.copy(camera_root.quaternion);
+
+        //planet.o.update(clock);
+
+        renderer.render(scene_bg, camera_bg);
+        renderer.clearDepth();
+        renderer.render(scene, camera);
+
+
+        stats.end();
+    }
+
+    clock.start();
+
+}
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -111,25 +137,4 @@ function onWindowResize() {
     camera_bg.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-
-
-
-
-function animate() {
-
-    stats.begin();
-
-    requestAnimationFrame(animate);
-
-    cameraControls.update();
-    camera_bg.quaternion.copy(camera_root.quaternion);
-
-    renderer.render(scene_bg, camera_bg);
-    renderer.clearDepth();
-    renderer.render(scene, camera);
-
-
-    stats.end();
 }
